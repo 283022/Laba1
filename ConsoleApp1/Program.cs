@@ -12,7 +12,7 @@ var s = check2.Current;
 var check3 = check.GetEnumerator();
 var s2 = check3.Current;
 
-
+//комментарий
 foreach (var item in check)
 {
     Console.WriteLine(item.GetType());
