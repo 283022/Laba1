@@ -56,14 +56,12 @@ public class CustomCollection<T> : IEnumerable<T>, IDisposable
             var newCapacity = Capacity * 2;
             var newMemory = Marshal.AllocHGlobal(newCapacity * Marshal.SizeOf<T>());
             
-            // Копируем старые данные в новую память
             for (var i = 0; i < Count; i++)
             {
                 var value = GetElement(_memory, i);
                 SetElement(newMemory, i, value);
             }
             
-            // Освобождаем старую память и обновляем давление GC
             Marshal.FreeHGlobal(_memory);
             GC.RemoveMemoryPressure(Capacity * Marshal.SizeOf<T>());
             
@@ -74,12 +72,10 @@ public class CustomCollection<T> : IEnumerable<T>, IDisposable
             GC.AddMemoryPressure(Capacity * Marshal.SizeOf<T>());
         }
         
-        // Записываем новый элемент
         SetElement(_memory, Count, item);
         Count++;
     }
-
-    // Индексатор
+    
     public T this[int index]
     {
         get
@@ -111,32 +107,28 @@ public class CustomCollection<T> : IEnumerable<T>, IDisposable
     {
         Marshal.StructureToPtr(value, memory + index * Marshal.SizeOf<T>(), false);
     }
-
-    // Реализация IEnumerable<T>
+    
     public IEnumerator<T> GetEnumerator()
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(CustomCollection<T>));
         return new CustomEnumerator(this);
     }
-
-    // Реализация IEnumerable
+    
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
     }
-
-    // Финализатор - будет вызван GC если Dispose не был вызван
+    
     ~CustomCollection()
     {
         Dispose(false);
     }
-
-    // Освобождение памяти (можно вызывать вручную, но не обязательно)
+    
     public void Dispose()
     {
         Dispose(true);
-        GC.SuppressFinalize(this); // Отменяем вызов финализатора
+        GC.SuppressFinalize(this);
     }
 
     protected virtual void Dispose(bool disposing)
@@ -153,7 +145,7 @@ public class CustomCollection<T> : IEnumerable<T>, IDisposable
         _disposed = true;
     }
 
-    // Внутренний класс-перечислитель с работой через память
+    // Энумератор
     private class CustomEnumerator(CustomCollection<T> collection) : IEnumerator<T>
     {
         private int _currentIndex = -1;
